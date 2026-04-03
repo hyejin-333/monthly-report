@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026년 3월 유료 공고 성과 분석</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #ffffff;
+    --navy-mid: #F4F6FA;
+    --navy-light: #EBF0F8;
+    --accent: #2563EB;
+    --accent-light: #1D4ED8;
+    --amber: #D97706;
+    --green: #059669;
+    --red: #DC2626;
+    --text: #111827;
+    --text-muted: #4B5563;
+    --text-dim: #9CA3AF;
+    --border: rgba(0,0,0,0.08);
+    --card-bg: #F8FAFC;
+    --card-border: rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #F1F5F9;
+    color: var(--text);
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+  body::before { display: none; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 60px 32px 80px; position: relative; z-index: 1; background: #fff; min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.06); }
+
+  /* 헤더 */
+  .report-header { margin-bottom: 56px; border-bottom: 1px solid var(--border); padding-bottom: 40px; }
+  .report-header .label { font-size: 11px; letter-spacing: 0.15em; color: var(--accent); font-weight: 500; text-transform: uppercase; margin-bottom: 12px; }
+  .report-header h1 { font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif; font-size: 38px; font-weight: 900; color: #0F172A; line-height: 1.2; margin-bottom: 14px; letter-spacing: -0.02em; }
+  .report-header h1 span { color: var(--accent); }
+  .report-header .meta { font-size: 13px; color: var(--text-muted); }
+  .report-header .meta b { color: var(--text); font-weight: 500; }
+
+  /* 섹션 */
+  .section { margin-bottom: 64px; }
+  .section-num { font-size: 11px; letter-spacing: 0.12em; color: var(--accent); font-weight: 500; text-transform: uppercase; margin-bottom: 6px; }
+  .section-title { font-size: 22px; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
+  .section-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
+
+  /* 카드 */
+  .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 24px 26px; }
+  .card-title { font-size: 12px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 16px; }
+
+  /* KPI 그리드 */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi { background: #F8FAFC; border: 1px solid var(--card-border); border-radius: 10px; padding: 16px 18px; }
+  .kpi .l { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.04em; }
+  .kpi .v { font-size: 24px; font-weight: 700; color: #0F172A; line-height: 1.1; }
+  .kpi .s { font-size: 11px; color: var(--text-dim); margin-top: 5px; }
+  .kpi.highlight { border-color: rgba(37,99,235,0.3); background: rgba(37,99,235,0.04); }
+  .kpi.up { border-color: rgba(5,150,105,0.3); background: rgba(5,150,105,0.04); }
+  .kpi.down { border-color: rgba(220,38,38,0.2); background: rgba(220,38,38,0.03); }
+  .up-tag { color: var(--green); font-size: 11px; font-weight: 500; }
+  .down-tag { color: var(--red); font-size: 11px; font-weight: 500; }
+  .neutral-tag { color: var(--text-muted); font-size: 11px; }
+
+  /* 차트 래퍼 */
+  .chart-wrap { position: relative; width: 100%; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* 인사이트 박스 */
+  .insight { border-left: 3px solid var(--accent); background: rgba(37,99,235,0.04); border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 12px; }
+  .insight.amber { border-color: var(--amber); background: rgba(217,119,6,0.04); }
+  .insight.green { border-color: var(--green); background: rgba(5,150,105,0.04); }
+  .insight.red { border-color: var(--red); background: rgba(220,38,38,0.04); }
+  .insight .t { font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 5px; }
+  .insight .d { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+
+  /* 테이블 */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th { color: var(--text-dim); font-weight: 500; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: 0.05em; }
+  .data-table td { padding: 9px 10px; border-bottom: 1px solid rgba(0,0,0,0.04); color: var(--text); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(0,0,0,0.015); }
+  .bar-cell { display: flex; align-items: center; gap: 8px; }
+  .mini-bar { height: 6px; border-radius: 3px; background: var(--accent); opacity: 0.5; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px; }
+  .tag-blue { background: rgba(37,99,235,0.1); color: var(--accent); }
+  .tag-amber { background: rgba(217,119,6,0.1); color: var(--amber); }
+  .tag-green { background: rgba(5,150,105,0.1); color: var(--green); }
+  .tag-red { background: rgba(220,38,38,0.1); color: var(--red); }
+
+  /* 구분선 */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+  /* 이벤트 카드 */
+  .event-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .event-card { background: #F8FAFC; border: 1px solid var(--card-border); border-radius: 10px; padding: 16px 18px; }
+  .event-card .co { font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 4px; }
+  .event-card .desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+  .event-card .stat { display: flex; gap: 12px; margin-top: 10px; }
+  .event-card .s-item { font-size: 11px; color: var(--text-dim); }
+  .event-card .s-item b { font-size: 13px; font-weight: 700; color: #0F172A; display: block; }
+
+  /* 푸터 */
+  .footer { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); }
+
+  @media (max-width: 640px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .grid2, .event-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <header class="report-header">
+    <div class="label">Monthly Performance Report · 유료 공고 기준 (직접등록 / 내부등록)</div>
+    <h1>2026년 3월<br><span>유료 공고 성과 분석</span></h1>
+    <div class="meta">
+      분석 기간 <b>2025.03 – 2026.03</b> &nbsp;|&nbsp; 기준 <b>공고 마감일</b> &nbsp;|&nbsp; 작성일 <b>2026.04.03</b>
+    </div>
+  </header>
+
+  <!-- ① 공고 수 추이 -->
+  <section class="section">
+    <div class="section-num">Section 01</div>
+    <div class="section-title">월별 공고 수 추이</div>
+    <div class="section-sub">온라인지원 공고와 홈페이지지원 공고의 월별 변화. 3월은 상반기 공채, 9월은 하반기 공채 시즌.</div>
+
+    <div class="kpi-grid" style="grid-template-columns: repeat(3,1fr);">
+      <div class="kpi">
+        <div class="l">26년 3월 전체 공고 수</div>
+        <div class="v">204건</div>
+        <div class="s">전월(187) 대비 <span class="up-tag">+9.1%</span></div>
+      </div>
+      <div class="kpi">
+        <div class="l">온라인지원 공고</div>
+        <div class="v">108건</div>
+        <div class="s">전월(101) 대비 <span class="up-tag">+6.9%</span></div>
+      </div>
+      <div class="kpi highlight">
+        <div class="l">홈페이지지원 공고</div>
+        <div class="v">100건</div>
+        <div class="s">전년 동월(75) 대비 <span class="up-tag">+33%</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">월별 공고 수 — 온라인지원 vs 홈페이지지원 (25.03 ~ 26.03)</div>
+      <div class="chart-wrap" style="height:240px;"><canvas id="c1"></canvas></div>
+    </div>
+
+    <div class="insight">
+      <div class="t">공고 수는 안정적 수준 유지 — 홈페이지지원 비중 꾸준히 증가</div>
+      <div class="d">전체 공고 수는 159~284건 사이에서 계절적 등락을 반복하며, 특별한 감소세 없음. 주목할 변화는 홈페이지지원 공고 비중으로, 25.03 기준 온라인:홈페이지 = 2.0:1이었던 비율이 26.03에는 1.08:1로 수렴. 공채 시즌에 대기업·공공기관 등 홈페이지지원 공고 유입이 지속적으로 늘고 있음을 확인.</div>
+    </div>
+    <div class="insight amber">
+      <div class="t">5월·10~11월 계절 저점 패턴 반복 — 비수기 선제 대응 필요</div>
+      <div class="d">매년 5월(159건)과 10~11월(163~169건)에 공고 수가 뚜렷하게 감소. 이는 기업들의 공채 일정 공백기와 맞물리는 구조적 패턴으로, 비수기 구간에 채용 수요를 선점하기 위한 기업별 맞춤 영업이 필요함.</div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ② 조회·지원 성과 -->
+  <section class="section">
+    <div class="section-num">Section 02</div>
+    <div class="section-title">조회수 · 지원수 · 공고당 효율 비교</div>
+    <div class="section-sub">홈페이지지원 공고 기준. "지원수"는 구직자가 공고에서 기업 홈페이지 채용 페이지로 이동한 클릭수.</div>
+
+    <div class="kpi-grid">
+      <div class="kpi down">
+        <div class="l">26.03 홈페이지 공고당 조회</div>
+        <div class="v">6,033회</div>
+        <div class="s">전년 동월(8,157) <span class="down-tag">-26%</span></div>
+      </div>
+      <div class="kpi up">
+        <div class="l">26.03 홈페이지 공고당 지원</div>
+        <div class="v">385.8건</div>
+        <div class="s">전년 동월(341.7) <span class="up-tag">+13%</span></div>
+      </div>
+      <div class="kpi up">
+        <div class="l">26.03 조회→지원 전환율</div>
+        <div class="v">6.39%</div>
+        <div class="s">역대 최고 <span class="up-tag">↑ 기존 최고 4.84%</span></div>
+      </div>
+      <div class="kpi up">
+        <div class="l">26.03 홈페이지 총 지원 이동</div>
+        <div class="v">38,577건</div>
+        <div class="s">전년 동월(25,625) <span class="up-tag">+50.5%</span></div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="card-title">공고당 조회수 추이 — 온라인 vs 홈페이지</div>
+        <div class="chart-wrap" style="height:210px;"><canvas id="c2"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">공고당 지원수 추이 — 온라인 vs 홈페이지</div>
+        <div class="chart-wrap" style="height:210px;"><canvas id="c3"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">조회→지원(홈페이지 클릭) 전환율 추이 — 25.09~26.03</div>
+      <div class="chart-wrap" style="height:160px;"><canvas id="c4"></canvas></div>
+    </div>
+
+    <div class="insight green">
+      <div class="t">전환율 6.39% — 역대 최고치 달성</div>
+      <div class="d">조회한 100명 중 6.4명이 기업 홈페이지 지원 페이지로 직접 이동. 이는 직전 최고였던 26.01(4.84%)을 크게 상회하는 수준. 공고 조회 자체가 감소했음에도 지원 이동 총량이 38,577건으로 역대 최고를 기록한 것은, 공고를 보는 구직자의 관심도와 타깃팅 품질이 구조적으로 향상되었음을 시사.</div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ③ 공고당 조회 하락 원인 -->
+  <section class="section">
+    <div class="section-num">Section 03</div>
+    <div class="section-title">공고당 조회수 하락 원인 분석</div>
+    <div class="section-sub">26년 3월 홈페이지 공고당 조회 6,033회 — 전년 동월(8,157) 대비 -26%. 숫자만 보면 우려스럽지만, 데이터를 분해하면 전혀 다른 그림이 나온다.</div>
+
+    <!-- 기: 문제 제기 -->
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+      <div style="width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">기</div>
+      <div style="font-size:15px; font-weight:700; color:#0F172A;">공고당 조회 하락 — 표면적 수치와 실제 트래픽은 다르다</div>
+    </div>
+
+    <div class="grid2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">플랫폼 실제 트래픽(라이브조회) vs 공고당 조회(마감기준)</div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="c_live"></canvas></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text-dim);">라이브조회: 당일 게재 중인 전체 공고 일별 합산 | 공고당조회: 해당 월 마감 공고의 게재기간 전체 누적</div>
+      </div>
+      <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="card-title">26년 3월 실제 트래픽 지표</div>
+        <div style="background:#F0FDF4; border:1px solid rgba(5,150,105,0.2); border-radius:8px; padding:14px 16px;">
+          <div style="font-size:11px; color:#059669; font-weight:500; margin-bottom:4px;">✅ 회복 완료</div>
+          <div style="font-size:22px; font-weight:700; color:#0F172A;">210,912</div>
+          <div style="font-size:12px; color:var(--text-muted);">일평균 라이브공고 조회수 — 25.03(203,780) 대비 <b style="color:#059669">+3.5%</b></div>
+        </div>
+        <div style="background:#F0FDF4; border:1px solid rgba(5,150,105,0.2); border-radius:8px; padding:14px 16px;">
+          <div style="font-size:11px; color:#059669; font-weight:500; margin-bottom:4px;">✅ 회복 완료</div>
+          <div style="font-size:22px; font-weight:700; color:#0F172A;">24,963명</div>
+          <div style="font-size:12px; color:var(--text-muted);">일평균 로그인 회원 — 25.03(26,350) 대비 <b style="color:#059669">-5%</b> 수준</div>
+        </div>
+        <div style="background:#FEF2F2; border:1px solid rgba(220,38,38,0.2); border-radius:8px; padding:14px 16px;">
+          <div style="font-size:11px; color:#DC2626; font-weight:500; margin-bottom:4px;">⚠️ 낮아 보임</div>
+          <div style="font-size:22px; font-weight:700; color:#DC2626;">6,033회</div>
+          <div style="font-size:12px; color:var(--text-muted);">홈페이지 공고당 조회 — 25.03(8,157) 대비 <b style="color:#DC2626">-26%</b></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 승: 원인 심층 -->
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+      <div style="width:28px; height:28px; border-radius:50%; background:#D97706; color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">승</div>
+      <div style="font-size:15px; font-weight:700; color:#0F172A;">공고 수는 2배 늘었지만 대형 공고는 줄었다 — 트래픽을 끄는 앵커가 사라졌다</div>
+    </div>
+
+    <div class="insight amber" style="margin-bottom:12px;">
+      <div class="t">30K+ 초대형 공고: 25.09 기준 4건 → 26.03 1건으로 감소</div>
+      <div class="d">25.09엔 CJ그룹(67K)·한국공항공사(42K)·현대제철(33K)·유한킴벌리(30K) 4건이 조회 합산 172,817회. 26.03엔 국민건강보험공단(51K) 단 1건(50,939회)만 존재. 3건 손실로 발생한 조회 공백이 약 12만 회. 공고 수가 50건→100건으로 2배 늘었지만 총조회 증가(+29%)가 공고 수 증가(+100%)를 따라가지 못하는 핵심 이유.</div>
+    </div>
+
+    <div class="card" style="margin-bottom: 16px;">
+      <div class="card-title">월별 30K+ 초대형 공고 현황과 공고당 조회 연동</div>
+      <div class="chart-wrap" style="height:210px;"><canvas id="c_huge"></canvas></div>
+      <div style="margin-top:8px; font-size:11px; color:var(--text-dim);">30K+ 공고가 많은 달(25.09·25.10)은 공고당 조회도 높음 — 대형 공고가 트래픽 앵커 역할 수행</div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">시뮬레이션 — 공고 수가 25.03과 동일한 75건이었다면?</div>
+      <div class="chart-wrap" style="height:190px;"><canvas id="c_sim"></canvas></div>
+      <div style="margin-top:10px; background:#F0FDF4; border-radius:8px; padding:12px 16px; font-size:13px;">
+        <b style="color:#059669;">603,295 ÷ 75건 = 8,044회</b>
+        <span style="color:var(--text-muted); margin-left:8px;">— 전년 동월(8,157회)과 사실상 동등. 트래픽 문제가 아닌 공급 구조 문제.</span>
+      </div>
+    </div>
+
+    <!-- 전: 구간별 구조 분리 -->
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+      <div style="width:28px; height:28px; border-radius:50%; background:#7C3AED; color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">전</div>
+      <div style="font-size:15px; font-weight:700; color:#0F172A;">25.10~12 저점은 다른 원인 — 공채시즌 이후 이용자 이탈</div>
+    </div>
+
+    <div class="insight" style="margin-bottom:12px; border-color:#7C3AED; background:rgba(124,58,237,0.04);">
+      <div class="t">같은 현상, 다른 원인 — 구간별로 진단을 분리해야 한다</div>
+      <div class="d">25.10에 로그인이 -19.0% 감소하자 라이브조회도 정확히 -19.0% 동반 감소. 이는 25.09 공채 시즌이 끝나면서 구직자들이 플랫폼을 떠난 계절적 이탈 현상. 반면 26.03은 로그인·트래픽이 전년 수준으로 회복된 상태에서 공고 수만 늘어 평균이 희석된 것으로 원인이 전혀 다르다.</div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">구간별 원인 구조 — 공채시즌 이탈 vs 공고 수 증가 희석</div>
+      <div style="overflow-x:auto;">
+        <table class="data-table" style="min-width:560px;">
+          <thead>
+            <tr>
+              <th>구간</th>
+              <th style="text-align:center;">일평균 로그인</th>
+              <th style="text-align:center;">일평균 라이브조회</th>
+              <th style="text-align:center;">홈페이지 공고 수</th>
+              <th style="text-align:center;">공고당 조회</th>
+              <th>주요 원인</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500;">25.03 (기준)</td>
+              <td style="text-align:center;">26,350명</td>
+              <td style="text-align:center;">203,780</td>
+              <td style="text-align:center;">75건</td>
+              <td style="text-align:center; font-weight:500;">8,157</td>
+              <td style="color:var(--text-dim); font-size:11px;">기준선</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500; color:#059669;">25.09 (공채 피크)</td>
+              <td style="text-align:center; color:#059669;">25,950명</td>
+              <td style="text-align:center; color:#059669;">247,420</td>
+              <td style="text-align:center;">115건</td>
+              <td style="text-align:center; font-weight:500; color:#059669;">8,944</td>
+              <td style="font-size:11px; color:#059669;">하반기 공채 집중 → 트래픽·공고 동반 급증</td>
+            </tr>
+            <tr style="background:rgba(220,38,38,0.03);">
+              <td style="font-weight:500; color:#DC2626;">25.10~12 (저점)</td>
+              <td style="text-align:center; color:#DC2626;">21,033명 ▼-19%</td>
+              <td style="text-align:center; color:#DC2626;">201,908 ▼-19%</td>
+              <td style="text-align:center;">88건</td>
+              <td style="text-align:center; font-weight:500; color:#DC2626;">6,911</td>
+              <td style="font-size:11px; color:#DC2626;">공채 종료 → 이용자 이탈 → 트래픽 동반 하락</td>
+            </tr>
+            <tr style="background:rgba(217,119,6,0.03);">
+              <td style="font-weight:500; color:#D97706;">26.03 (당월)</td>
+              <td style="text-align:center; color:#059669;">24,963명 ✅</td>
+              <td style="text-align:center; color:#059669;">210,912 ✅</td>
+              <td style="text-align:center; color:#DC2626; font-weight:500;">100건 ▲+33%</td>
+              <td style="text-align:center; font-weight:700; color:#DC2626;">6,033</td>
+              <td style="font-size:11px; color:#D97706;">트래픽 회복 + 공고 수 증가 → 평균 희석</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 결: 결론 및 시사점 -->
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+      <div style="width:28px; height:28px; border-radius:50%; background:#059669; color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">결</div>
+      <div style="font-size:15px; font-weight:700; color:#0F172A;">결론 및 시사점 — 공고당 조회는 관리 가능한 지표, 그러나 구조적 과제가 있다</div>
+    </div>
+
+    <div style="background:linear-gradient(135deg, #F0FDF4 0%, #EFF6FF 100%); border:1px solid rgba(5,150,105,0.2); border-radius:12px; padding:20px 22px; margin-bottom:16px;">
+      <div style="font-size:14px; font-weight:700; color:#0F172A; margin-bottom:10px;">핵심 메시지</div>
+      <div style="font-size:13px; color:#1E3A5F; line-height:1.9;">
+        26년 3월 공고당 조회 하락은 <b>플랫폼 트래픽 이탈이 아니다.</b> 이용자는 돌아왔고 라이브공고 조회도 전년 동월 수준 이상으로 회복됐다.<br>
+        하락의 구조적 원인은 두 가지가 복합 작용한 것이다: <b>① 공고 수 +33% 증가로 트래픽 파이가 희석</b>되었고,
+        <b>② 25.09엔 있었던 30K+ 초대형 공고 4건이 26.03엔 1건으로 줄어</b> 총조회 분자 자체가 충분히 커지지 못했다.<br>
+        같은 공고 구성이었다면 공고당 조회는 <b>8,044회</b>로 전년 동월과 동등했다.
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
+      <div class="insight green" style="margin-bottom:0;">
+        <div class="t">① 초대형 공고 확보 — 분자 확대</div>
+        <div class="d">30K+ 앵커 공고 확보가 핵심. 민간 대기업 상반기 공채(4~5월 마감)를 플랫폼으로 유치하면 4~5월 수치 개선 가능. CJ그룹은 이미 4월에 70K 기록 중.</div>
+      </div>
+      <div class="insight amber" style="margin-bottom:0;">
+        <div class="t">② 공고 품질 기준 강화 — 분모 관리</div>
+        <div class="d">저조회 공고(&lt;1K)가 10건으로 늘어 평균 희석. 홈페이지지원 공고의 최소 품질 기준 설정으로 공고 수 증가와 효율을 함께 관리하는 포트폴리오 전략 필요.</div>
+      </div>
+      <div class="insight" style="margin-bottom:0; border-color:#7C3AED; background:rgba(124,58,237,0.04);">
+        <div class="t">③ 비시즌 트래픽 방어 — 구조적 과제</div>
+        <div class="d">비시즌에도 일 22,000명 이상이 로그인하지만, 공채 외 재방문 유인(이력서 관리·연봉 정보·커리어 콘텐츠 등)이 부재. 비공채 구간 플랫폼 체류 시간과 조회를 늘릴 서비스 확충이 장기 과제.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:4px; margin-bottom:16px;">
+      <div class="card-title">비시즌 트래픽 현황 — 이용자는 있지만 볼 것이 부족하다</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; margin-bottom:14px;">
+        <div style="background:#F8FAFC; border-radius:8px; padding:12px 14px; border:1px solid var(--card-border);">
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">공채 피크 (25.09)</div>
+          <div style="font-size:18px; font-weight:700;">25,950명</div>
+          <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">일평균 로그인</div>
+        </div>
+        <div style="background:#FEF2F2; border-radius:8px; padding:12px 14px; border:1px solid rgba(220,38,38,0.15);">
+          <div style="font-size:11px; color:#DC2626; margin-bottom:4px;">비시즌 평균 (25.11~26.02)</div>
+          <div style="font-size:18px; font-weight:700;">22,368명</div>
+          <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">일평균 로그인 · 피크 대비 <b style="color:#DC2626;">-14%</b></div>
+        </div>
+        <div style="background:#F8FAFC; border-radius:8px; padding:12px 14px; border:1px solid var(--card-border);">
+          <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">공채 피크 (25.09)</div>
+          <div style="font-size:18px; font-weight:700;">247,420회</div>
+          <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">일평균 라이브조회</div>
+        </div>
+        <div style="background:#FEF2F2; border-radius:8px; padding:12px 14px; border:1px solid rgba(220,38,38,0.15);">
+          <div style="font-size:11px; color:#DC2626; margin-bottom:4px;">비시즌 평균 (25.11~26.02)</div>
+          <div style="font-size:18px; font-weight:700;">196,135회</div>
+          <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">일평균 라이브조회 · 피크 대비 <b style="color:#DC2626;">-21%</b></div>
+        </div>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted); line-height:1.8; background:rgba(124,58,237,0.04); border-radius:8px; padding:12px 14px; border-left:3px solid #7C3AED;">
+        비시즌에도 일 22,000명 이상이 플랫폼에 로그인한다. 이들이 공채 공고가 없는 비시즌에 플랫폼을 찾는 목적(이력서 관리·채용 정보 탐색 등)에 맞는 서비스가 현재 부재하여, 로그인 후 공고를 보지 않고 이탈하는 구조. 비시즌 로그인 1인당 라이브조회는 8.77회로 공채 피크(9.53회) 대비 -8% 수준 — 이용자의 탐색 의지 자체보다 <b style="color:#7C3AED;">볼 것이 없어서 떠나는 구조</b>에 가까움.
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:4px;">
+      <div class="card-title">초고조회 공고(≥10K) 수 비교 — 공채 시즌별</div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="c5"></canvas></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ④ 주요 기업 집계 맥락 -->
+  <section class="section">
+    <div class="section-num">Section 04</div>
+    <div class="section-title">주요 기업 집계 맥락 정리</div>
+    <div class="section-sub">26.03 집계에서 확인이 필요한 기업별 상황 — 마감일 기준 집계의 특성상 게재 중인 공고는 마감 월에 반영됨</div>
+
+    <div class="event-grid">
+      <div class="event-card" style="border-color:rgba(37,99,235,0.25);">
+        <div class="co">CJ그룹 — 상반기 공채 정상 출고</div>
+        <div class="desc">26년 상반기 공채 마감일 4/1로 4월 집계에 포함. 25년 하반기 공채도 9/24 마감으로 동일한 패턴. CJ그룹의 공채 방식은 전년과 동일하며, 조회수 70,292회로 소폭 성장.</div>
+        <div class="stat">
+          <div class="s-item"><b style="color:var(--accent);">70,292</b>26.04 조회</div>
+          <div class="s-item"><b style="color:var(--accent);">67,064</b>25.09 조회</div>
+          <div class="s-item"><b style="color:var(--green);">+4.8%</b>성장</div>
+        </div>
+      </div>
+      <div class="event-card" style="border-color:rgba(217,119,6,0.25);">
+        <div class="co">한국공항공사 — 상반기 공채 접수 중</div>
+        <div class="desc">3/31 접수 시작으로 마감일이 4월 이후 예정. 25.09에 42,207회로 조회 2위를 기록한 기업. 마감 후 해당 월에 집계 예정이며 26년 성과 비교 시 포함 필요.</div>
+        <div class="stat">
+          <div class="s-item"><b style="color:var(--amber);">42,207</b>25.09 조회</div>
+          <div class="s-item"><b style="color:var(--amber);">4,572</b>25.09 클릭</div>
+          <div class="s-item"><b>4월+</b>집계예정</div>
+        </div>
+      </div>
+      <div class="event-card" style="border-color:rgba(5,150,105,0.25);">
+        <div class="co">유한킴벌리 — 상반기 공고 조기 집행</div>
+        <div class="desc">26년 상반기 대규모 공고를 26.02에 58일 장기 게재로 집행(59,701회). 26.03에 추가 공고(14,640회) 출고. 상반기 채용 시즌을 앞당겨 집행한 전략으로, 두 공고 합산 기준 전년 하반기(30,313회) 대비 성과 확대.</div>
+        <div class="stat">
+          <div class="s-item"><b style="color:var(--green);">59,701</b>26.02 조회</div>
+          <div class="s-item"><b style="color:var(--green);">14,640</b>26.03 조회</div>
+          <div class="s-item"><b style="color:var(--green);">합산↑</b>전년比</div>
+        </div>
+      </div>
+      <div class="event-card" style="border-color:rgba(220,38,38,0.2);">
+        <div class="co">현대제철 — 상반기 공채 미출고</div>
+        <div class="desc">25.09 하반기 공채에서 33,233회를 기록했으나 26년 상반기는 공채 예정 없음. 하반기 중심 채용 기업으로, 25.09 대비 조회 손실 요인 중 하나. 하반기 시즌 재확보가 필요한 기업.</div>
+        <div class="stat">
+          <div class="s-item"><b style="color:var(--red);">33,233</b>25.09 조회</div>
+          <div class="s-item"><b style="color:var(--red);">미출고</b>26년 상반기</div>
+          <div class="s-item"><b>25.09→</b>재확보 목표</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ⑤ 26년 3월 성과 및 인사이트 -->
+  <section class="section">
+    <div class="section-num">Section 05</div>
+    <div class="section-title">26년 3월 종합 인사이트</div>
+    <div class="section-sub">전년 상반기(25.03) · 하반기(25.09) 공채 시즌 대비 구조적 변화 분석</div>
+
+    <!-- 공채시즌 3개월 비교표 -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">공채 시즌 핵심 지표 비교</div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="c6"></canvas></div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">26년 3월 홈페이지 공고 성과 상위 20 (조회수 기준) · 전기비: 25년 9~10월 동일 기업 비교</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>기업명</th>
+            <th>조회수</th>
+            <th>지원이동</th>
+            <th>전환율</th>
+            <th>전기비 (25.09~10)</th>
+            <th>포인트</th>
+          </tr>
+        </thead>
+        <tbody id="companyTable"></tbody>
+      </table>
+    </div>
+
+    <div class="insight green">
+      <div class="t">총 지원이동 38,577건 — 역대 최고, 전년 동월 대비 +50.5%</div>
+      <div class="d">공고당 조회수가 낮아 보이는 착시와 달리, 실질 성과 지표인 홈페이지 지원이동 총량은 역대 최고. 공고 수 증가(75→100건)와 전환율 개선(4.19%→6.39%)이 동시에 작용한 결과. 플랫폼이 기업에 연결해준 구직자 총량은 명백히 성장했음.</div>
+    </div>
+
+    <div class="insight">
+      <div class="t">삼성물산 상사부문 — 전환율 28.7%, 민간 대기업 중 독보적</div>
+      <div class="d">조회수 16,311회, 홈페이지 클릭 4,676건. 전환율 28.7%는 26.03 전체 공고 중 1위. 8일의 짧은 게재 기간에도 브랜드 인지도와 직무 타깃팅이 높아 조회→지원 연결이 집중적으로 발생. 상반기 민간 대기업 공채 중 유일하게 플랫폼에 출고된 사례로, 대기업 출고 유치의 효과를 검증하는 벤치마크 역할.</div>
+    </div>
+
+    <div class="insight">
+      <div class="t">국민건강보험공단 — 50,939회 조회, 전환율 13.3%로 공공기관 최상위</div>
+      <div class="d">26.03 전체 최고 조회를 기록하며 공공기관 대형 공고의 저력을 증명. 6,754건 클릭은 전체 1위. 14일 게재 기간 대비 압도적 효율. 전년 하반기 CJ그룹(3,298클릭)을 초과하는 클릭 실적으로, 공공기관 공채가 민간 대기업 공채 못지않은 플랫폼 효과를 낼 수 있음을 확인.</div>
+    </div>
+
+    <div class="insight amber">
+      <div class="t">상반기 vs 하반기 구조적 차이 — 공공기관 중심 vs 민간+공공 혼합</div>
+      <div class="d">25.09(하반기)에는 CJ(67K)·공항공사(42K)·현대제철(33K) 등 민간 대기업이 상위를 차지했지만, 상반기(26.03)는 건보공단(50K)·부동산원(26K)·한수원(19K) 등 공공기관이 중심. 민간 대기업 상반기 공채는 4~5월 마감이 많아 3월 집계에 잡히기 어려운 구조. 상반기 공채 시즌 성과를 3월 단독이 아닌 3~5월 합산으로 평가해야 정확한 비교 가능.</div>
+    </div>
+
+    <div class="insight amber">
+      <div class="t">한국은행 — 같은 달 두 공고 동시 집행으로 효율 분산</div>
+      <div class="d">26.03에 일반기능직(10,260회)과 26.04에 경력직(7,631회) 별도 공고 출고. 유사한 시기에 두 공고가 트래픽을 나누는 구조. 단일 통합 공고로 집행 시 더 높은 조회 집중 효과를 기대할 수 있으며, 기업별 다중 공고 전략 컨설팅 기회로 활용 가능.</div>
+    </div>
+  </section>
+
+  <!-- 푸터 -->
+  <footer class="footer">
+    <span>2026년 3월 공고 성과 리포트 · 유료 공고 기준</span>
+    <span>집계 기준: 공고 마감일 · 2025.03.01 – 2026.03.31</span>
+  </footer>
+
+</div>
+
+<script>
+const MONTHS = ['25.03','25.04','25.05','25.06','25.07','25.08','25.09','25.10','25.11','25.12','26.01','26.02','26.03'];
+const BLUE = '#2563EB', AMBER = '#D97706', GREEN = '#059669', RED='#DC2626';
+const GRID = 'rgba(0,0,0,0.06)';
+const TICK = { color:'#6B7280', font:{ family:"'Noto Sans KR',sans-serif", size:11 } };
+const baseOpts = (legend=false) => ({
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend:{ display:legend, labels:{ color:'#4B5563', font:{size:11}, boxWidth:10, boxHeight:10, padding:16 } }, tooltip:{ mode:'index', intersect:false, backgroundColor:'rgba(255,255,255,0.97)', borderColor:'rgba(0,0,0,0.1)', borderWidth:1, titleColor:'#111827', bodyColor:'#4B5563', padding:10 } },
+  scales: { x:{ ticks:TICK, grid:{color:GRID} }, y:{ ticks:TICK, grid:{color:GRID} } }
+});
+
+// ① 공고 수 추이 (누적 막대)
+new Chart(document.getElementById('c1'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '온라인지원', data:[149,201,93,124,135,112,112,85,80,93,109,101,108], backgroundColor:BLUE+'88', stack:'s' },
+      { label: '홈페이지지원', data:[75,89,70,91,104,97,115,86,86,93,69,86,100], backgroundColor:AMBER+'88', stack:'s' }
+    ]
+  },
+  options: { ...baseOpts(true),
+    scales:{ x:{stacked:true,ticks:TICK,grid:{color:GRID}}, y:{stacked:true,ticks:TICK,grid:{color:GRID}} }
+  }
+});
+
+// ② 공고당 조회수
+new Chart(document.getElementById('c2'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label:'온라인', data:[1714,1616,2026,1913,1471,1557,2247,1461,4948,1713,3214,1987,1926], borderColor:BLUE, borderWidth:2, pointRadius:3, tension:0.3, fill:false },
+      { label:'홈페이지', data:[8157,7716,7749,6732,7108,8293,8944,8258,6272,6201,7363,5624,6033], borderColor:AMBER, borderWidth:2, pointRadius:3, tension:0.3, fill:false }
+    ]
+  },
+  options: { ...baseOpts(true),
+    scales:{ x:{ticks:TICK,grid:{color:GRID}}, y:{ticks:{...TICK,callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:GRID}} }
+  }
+});
+
+// ③ 공고당 지원수
+new Chart(document.getElementById('c3'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label:'온라인', data:[9.4,7.6,10.3,13.6,9.9,11.6,15.9,7.7,20.9,13.2,16.3,18.0,13.2], borderColor:BLUE, borderWidth:2, pointRadius:3, tension:0.3, fill:false },
+      { label:'홈페이지', data:[341.7,235.1,231.5,256.6,249.2,370.7,384.9,384.0,204.7,266.0,356.4,256.5,385.8], borderColor:AMBER, borderWidth:2, pointRadius:3, tension:0.3, fill:false }
+    ]
+  },
+  options: { ...baseOpts(true),
+    scales:{ x:{ticks:TICK,grid:{color:GRID}}, y:{ticks:TICK,grid:{color:GRID}} }
+  }
+});
+
+// ④ 전환율
+new Chart(document.getElementById('c4'), {
+  type: 'line',
+  data: {
+    labels: ['25.09','25.10','25.11','25.12','26.01','26.02','26.03'],
+    datasets: [{
+      label:'조회→지원 전환율(%)',
+      data:[4.58,4.65,3.26,4.29,4.84,4.56,6.39],
+      borderColor: GREEN,
+      backgroundColor: ctx => {
+        const g = ctx.chart.ctx.createLinearGradient(0,0,0,160);
+        g.addColorStop(0,'rgba(5,150,105,0.15)'); g.addColorStop(1,'rgba(5,150,105,0)');
+        return g;
+      },
+      borderWidth:2.5, pointRadius:4, tension:0.4, fill:true,
+      pointBackgroundColor: (ctx) => ctx.dataIndex===6 ? GREEN : 'transparent',
+      pointBorderColor: GREEN
+    }]
+  },
+  options: { ...baseOpts(false),
+    scales:{
+      x:{ticks:TICK,grid:{color:GRID}},
+      y:{min:2,max:8,ticks:{...TICK,callback:v=>v+'%'},grid:{color:GRID}}
+    }
+  }
+});
+
+// c_huge — 30K+ 대형 공고 수와 공고당 조회 연동
+const MONTHS_78 = ['25.09','25.10','25.11','25.12','26.01','26.02','26.03'];
+const huge30k = [4, 2, 1, 1, 2, 1, 1];  // 30K+ 건수
+const adPer78 = [9363, 8258, 6272, 6201, 7363, 5624, 6033]; // 공고당조회
+new Chart(document.getElementById('c_huge'), {
+  data:{
+    labels: MONTHS_78,
+    datasets:[
+      { type:'bar', label:'30K+ 초대형 공고 수', data:huge30k,
+        backgroundColor: huge30k.map(v=>v>=3?RED+'CC':v===2?AMBER+'CC':RED+'44'),
+        yAxisID:'y', borderRadius:4 },
+      { type:'line', label:'공고당 조회수', data:adPer78,
+        borderColor:BLUE, borderWidth:2.5, pointRadius:5, tension:0.3, fill:false, yAxisID:'y2',
+        pointBackgroundColor: adPer78.map((_,i)=>i===0?BLUE:'transparent'),
+        pointBorderColor:BLUE }
+    ]
+  },
+  options:{responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}, tooltip:{mode:'index',intersect:false,
+      callbacks:{label:ctx=>ctx.datasetIndex===0?'30K+ 공고: '+ctx.raw+'건':'공고당 조회: '+ctx.raw.toLocaleString()+'회'}}},
+    scales:{
+      x:{ticks:TICK,grid:{display:false}},
+      y:{position:'left',min:0,max:6,ticks:{...TICK,stepSize:1},grid:{color:GRID},title:{display:true,text:'30K+ 공고 수',color:'#9CA3AF',font:{size:10}}},
+      y2:{position:'right',ticks:{...TICK,callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{display:false},title:{display:true,text:'공고당 조회',color:'#9CA3AF',font:{size:10}}}
+    }
+  }
+});
+
+// Section03 추가 차트: c_live — 라이브조회 vs 공고당조회
+const liveViewData = [203.8,208.7,167.2,168.7,198.2,204.3,247.4,200.5,198.2,206.6,196.2,183.6,210.9];
+const adPerViewData = [8157,7716,7749,6732,7108,8293,8944,8258,6272,6201,7363,5624,6033];
+new Chart(document.getElementById('c_live'), {
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { type:'bar', label:'일평균 라이브조회(천 회)', data:liveViewData,
+        backgroundColor: MONTHS.map((_,i)=>i===12?BLUE+'AA':BLUE+'44'), yAxisID:'y' },
+      { type:'line', label:'홈페이지 공고당조회(회)', data:adPerViewData,
+        borderColor:RED, borderWidth:2.5, pointRadius:4, tension:0.3, fill:false, yAxisID:'y2',
+        pointBackgroundColor: adPerViewData.map((_,i)=>i===12?RED:'transparent'),
+        pointBorderColor: RED }
+    ]
+  },
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false,
+      callbacks:{label:ctx=>ctx.datasetIndex===0?'라이브조회: '+(ctx.raw*1000).toLocaleString()+'회':'공고당조회: '+ctx.raw.toLocaleString()+'회'}}},
+    scales:{
+      x:{ticks:TICK,grid:{display:false}},
+      y:{position:'left',ticks:{...TICK,callback:v=>v+'K'},grid:{color:GRID},title:{display:true,text:'라이브조회(천)',color:'#9CA3AF',font:{size:10}}},
+      y2:{position:'right',ticks:{...TICK,callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{display:false},title:{display:true,text:'공고당조회',color:'#9CA3AF',font:{size:10}}}
+    }
+  }
+});
+
+// c_sim — 실제 vs 시뮬레이션 (공고 75건 고정)
+const totalViewRaw = [611763,686704,542445,612632,739220,804460,1028545,710186,539431,576654,508014,483701,603295];
+const simulatedFixed75 = totalViewRaw.map(v=>Math.round(v/75));
+new Chart(document.getElementById('c_sim'), {
+  data:{
+    labels:MONTHS,
+    datasets:[
+      {type:'bar',label:'실제 공고당 조회',data:adPerViewData,backgroundColor:adPerViewData.map((_,i)=>i===12?RED+'BB':RED+'44'),borderRadius:3,yAxisID:'y'},
+      {type:'line',label:'가상(공고수=75건 고정)',data:simulatedFixed75,borderColor:GREEN,borderWidth:2.5,pointRadius:3,tension:0.3,fill:false,yAxisID:'y',borderDash:[6,3]}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.raw.toLocaleString()+'회'}}},
+    scales:{
+      x:{ticks:TICK,grid:{display:false}},
+      y:{ticks:{...TICK,callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:GRID}}
+    }
+  }
+});
+
+// ⑤ 초고조회 공고 수 비교
+new Chart(document.getElementById('c5'), {
+  type: 'bar',
+  data: {
+    labels: ['25.09 (하반기)','26.03 (상반기)'],
+    datasets: [
+      { label:'≥30K 공고 수', data:[4,1], backgroundColor:RED+'99', borderRadius:4 },
+      { label:'10K~30K 공고 수', data:[6,15], backgroundColor:AMBER+'99', borderRadius:4 },
+      { label:'5K~10K 공고 수', data:[10,9], backgroundColor:BLUE+'99', borderRadius:4 }
+    ]
+  },
+  options: { ...baseOpts(true),
+    scales:{
+      x:{ticks:TICK,grid:{display:false}},
+      y:{ticks:TICK,grid:{color:GRID},title:{display:true,text:'공고 수(건)',color:'#4A637F',font:{size:11}}}
+    }
+  }
+});
+
+// ⑥ 공채시즌 비교 레이더
+new Chart(document.getElementById('c6'), {
+  type: 'radar',
+  data: {
+    labels: ['홈페이지\n공고 수', '공고당\n조회(÷100)', '공고당\n지원(÷10)', '전환율\n(×10)', '10K+\n공고 수', '총지원\n이동(÷1000)'],
+    datasets: [
+      { label:'25.03 (전년 상반기)', data:[75,81.6,34.2,41.9,0,25.6], borderColor:'rgba(37,99,235,0.7)', backgroundColor:'rgba(37,99,235,0.07)', pointBackgroundColor:BLUE, borderWidth:2 },
+      { label:'25.09 (전년 하반기)', data:[115,89.4,38.5,45.8,10,44.3], borderColor:'rgba(217,119,6,0.7)', backgroundColor:'rgba(217,119,6,0.07)', pointBackgroundColor:AMBER, borderWidth:2 },
+      { label:'26.03 (당월)', data:[100,60.3,38.6,63.9,16,38.6], borderColor:'rgba(5,150,105,0.8)', backgroundColor:'rgba(5,150,105,0.08)', pointBackgroundColor:GREEN, borderWidth:2.5 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, labels:{ color:'#4B5563', font:{size:11}, boxWidth:10, padding:16 } }, tooltip:{backgroundColor:'rgba(255,255,255,0.97)',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,titleColor:'#111827',bodyColor:'#4B5563',padding:10} },
+    scales:{ r:{ ticks:{color:'#9CA3AF',backdropColor:'transparent',font:{size:10}}, grid:{color:'rgba(0,0,0,0.07)'}, angleLines:{color:'rgba(0,0,0,0.07)'}, pointLabels:{color:'#4B5563',font:{size:11}} } }
+  }
+});
+
+// 기업 테이블 (전기비 = 25.09~10 동일기업 비교)
+const companies = [
+  { rank:1,  name:'국민건강보험공단',   views:50939, clicks:6754, rate:13.3, prev:null,  prevM:null,    point:'공공기관 최고 조회·클릭 1위' },
+  { rank:2,  name:'한국부동산원',       views:26259, clicks:4565, rate:17.4, prev:5762,  prevM:'25.09', point:'전환율 17% 우수' },
+  { rank:3,  name:'한국수력원자력',     views:26462, clicks:1768, rate:6.7,  prev:9209,  prevM:'25.10', point:'2건 합산 · 신입+인턴' },
+  { rank:4,  name:'국방과학연구소',     views:19383, clicks:1045, rate:5.4,  prev:null,  prevM:null,    point:'연구기관 신규 진입' },
+  { rank:5,  name:'(주)농협물류',       views:18793, clicks:1592, rate:8.5,  prev:null,  prevM:null,    point:'11일 단기 고효율' },
+  { rank:6,  name:'한국사회보장정보원', views:17593, clicks:815,  rate:4.6,  prev:null,  prevM:null,    point:'' },
+  { rank:7,  name:'삼성물산 상사부문',  views:16311, clicks:4676, rate:28.7, prev:null,  prevM:null,    point:'민간 대기업 전환율 1위' },
+  { rank:8,  name:'한국기계연구원',     views:15829, clicks:1591, rate:10.1, prev:4579,  prevM:'25.09', point:'' },
+  { rank:9,  name:'유한킴벌리',         views:14640, clicks:676,  rate:4.6,  prev:30313, prevM:'25.09', point:'26.02 대형공고(59K) 별도' },
+  { rank:10, name:'재단법인 청년재단',  views:14109, clicks:545,  rate:3.9,  prev:null,  prevM:null,    point:'신규 대형 진입' },
+  { rank:11, name:'한국철도공사',       views:12546, clicks:321,  rate:2.6,  prev:7053,  prevM:'25.10', point:'' },
+  { rank:12, name:'(주)하나은행',       views:11303, clicks:499,  rate:4.4,  prev:null,  prevM:null,    point:'금융권 대표 공고' },
+  { rank:13, name:'한국관세정보원',     views:10693, clicks:344,  rate:3.2,  prev:null,  prevM:null,    point:'' },
+  { rank:14, name:'한국항공우주연구원', views:10392, clicks:403,  rate:3.9,  prev:null,  prevM:null,    point:'' },
+  { rank:15, name:'한국은행',           views:10260, clicks:740,  rate:7.2,  prev:null,  prevM:null,    point:'4월 경력직 공고 추가' },
+  { rank:16, name:'군포도시공사',       views:10042, clicks:515,  rate:5.1,  prev:null,  prevM:null,    point:'' },
+  { rank:17, name:'한국남부발전',       views:9635,  clicks:482,  rate:5.0,  prev:null,  prevM:null,    point:'' },
+  { rank:18, name:'광주과학기술원',     views:9160,  clicks:130,  rate:1.4,  prev:null,  prevM:null,    point:'' },
+  { rank:19, name:'(주)케이알산업',     views:9069,  clicks:614,  rate:6.8,  prev:null,  prevM:null,    point:'' },
+  { rank:20, name:'쌍용건설',           views:8867,  clicks:438,  rate:4.9,  prev:null,  prevM:null,    point:'' },
+];
+const maxViews = 50939;
+const tbody = document.getElementById('companyTable');
+companies.forEach(c => {
+  let prevHtml = '<span style="color:#9CA3AF;font-size:11px">—</span>';
+  if (c.prev !== null) {
+    const chg = (c.views - c.prev) / c.prev * 100;
+    const col = chg >= 0 ? '#059669' : '#DC2626';
+    const sign = chg >= 0 ? '▲' : '▼';
+    prevHtml = `<span style="font-size:11px;color:#6B7280">${c.prevM} ${c.prev.toLocaleString()}</span>&nbsp;<b style="color:${col};font-size:12px">${sign}${Math.abs(chg).toFixed(0)}%</b>`;
+  }
+  tbody.innerHTML += `<tr>
+    <td style="color:#9CA3AF">${c.rank}</td>
+    <td style="font-weight:500">${c.name}</td>
+    <td><div class="bar-cell"><div class="mini-bar" style="width:${Math.round(c.views/maxViews*80)}px"></div>${c.views.toLocaleString()}</div></td>
+    <td>${c.clicks.toLocaleString()}</td>
+    <td style="font-weight:${c.rate>=10?'700':'400'};color:${c.rate>=10?'#059669':c.rate>=5?'#D97706':'#4B5563'}">${c.rate}%</td>
+    <td>${prevHtml}</td>
+    <td style="color:${c.rate>=10?'#059669':c.point?'#D97706':'#9CA3AF'};font-size:11px">${c.point||'—'}</td>
+  </tr>`;
+});
+</script>
+</body>
+</html>
